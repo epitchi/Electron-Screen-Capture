@@ -1,26 +1,10 @@
+const videoSelectBtn = document.getElementById('videoSelectBtn');
+videoSelectBtn.onclick = getVideoSources;
+
 const { desktopCapturer, remote } = require('electron')
 const { dialog, Menu } = remote;
 const { writeFile } = require('fs');
-
-let mediaRecorder; // MediaRecorder instance to capture footage
-const recordedChunks = [];
-
-const startBtn = document.getElementById('startBtn');
-startBtn.onclick = e => {
-    mediaRecorder.start();
-    startBtn.classList.add('is-danger');
-    startBtn.innerText = 'Recording';
-};
-
-const stopBtn = document.getElementById('stopBtn');
-stopBtn.onclick = e => {
-    mediaRecorder.stop();
-    startBtn.classList.remove('is-danger');
-    startBtn.innerText = 'Start';
-}
-
-const videoSelectBtn = document.getElementById('videoSelectBtn');
-videoSelectBtn.onclick = getVideoSources;
+const videoElement = document.querySelector('video');
 
 // Get the available video sources 
 async function getVideoSources(){
@@ -40,12 +24,15 @@ async function getVideoSources(){
     videoOptionsMenu.popup();
 }
 
+let mediaRecorder; // MediaRecorder instance to capture footage
+const recordedChunks = [];
+
 // Change the videoSource windows to record 
 async function selectSource(source){
     
     videoSelectBtn.innerText = source.name;
 
-    const contraints = {
+    const constraints = {
         audio: false,
         video: {
             mandatory: {
@@ -56,7 +43,7 @@ async function selectSource(source){
     };
 
     // Create a Stream 
-    const stream = await navigator.mediaDevices.getUserMedia(contraints);
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
     
     // Preview the source in a video element
     videoElement.srcObject = stream;    
@@ -71,7 +58,20 @@ async function selectSource(source){
     mediaRecorder.onstop = handleStop;
 }
 
+const startBtn = document.getElementById('startBtn');
+startBtn.onclick = e => {
+    mediaRecorder.start();
+    startBtn.classList.add('is-danger');
+    startBtn.innerText = 'Recording';
+};
 
+const stopBtn = document.getElementById('stopBtn');
+
+stopBtn.onclick = e => {
+    mediaRecorder.stop();
+    startBtn.classList.remove('is-danger');
+    startBtn.innerText = 'Start';
+}
 
 
 // Captures all recorded chunks
@@ -98,3 +98,4 @@ async function handleStop(e){
 
     writeFile(filePath, buffer, () => console.log('Video saved successfully!'))
 }
+1
